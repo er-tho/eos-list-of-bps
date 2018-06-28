@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en-GB" prefix="og: http://ogp.me/ns#">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <title>EOS block producers &bull; franceos</title>
+
+    <link rel='dns-prefetch' href='//fonts.googleapis.com' />
+    <link rel='dns-prefetch' href='//s.w.org' />
+    <link rel='stylesheet' href='css/reset.css?ver=f1266d' type='text/css' media='all' />
+    <link rel='stylesheet' href='css/css.css' type='text/css' media='all' />
+</head>
+
+<body class="">
+<div class="top-announcement">
+    <span class="top-announcement-text">Vote for franceos as block producer!</span><br>
+    BP ID : <span class="top-announcement-bp-id">franceosysbp</span><a href="https://www.franceos.fr/secure-bp-voting/" target="_blank">How to vote?</a>
+</div>
+
+<div class="cryptro-body-outer-wrapper">
+    <div class="clearfix">
+        <div class="cryptro-header-background-transparent">
+            <header class="cryptro-header-style-plain">
+                <div class="cryptro-container">
+
+                    <div class="cryptro-header-container-inner clearfix">
+                        <div class="cryptro-logo">
+                            <div class="cryptro-logo-inner">
+                                <a href="https://www.franceos.fr" target="_blank"><img src="img/franceos-logos-dark-15-800x196.png"></a></div>
+                        </div>
+                        <div class="cryptro-navigation" >
+                            <div class="cryptro-main-menu" id="cryptro-main-menu" >
+                                <ul class="sf-menu">
+                                    <li  class="menu-item"><a href="https://www.franceos.fr" target="_blank">Main website</a></li>
+                                    <li  class="menu-item"><a href="https://www.franceos.fr/secure-bp-voting/" target="_blank">Vote</a></li>
+                                    <li  class="menu-item"><a href="https://www.franceos.fr/blog/" target="_blank">Blog</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </header>
+        </div>
+        <div class="cryptro-page-title-wrap" >
+            <div class="cryptro-header-transparent-substitute" style="height: 116px;"></div>
+            <div class="cryptro-container" >
+                <div class="cryptro-page-title-content"><h1 class="cryptro-page-title">List of EOS block producers</h1></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="cryptro-page-wrapper" id="cryptro-page-wrapper" >
+    <div class="cryptro-container" >
+
+        <div id="info_message"></div>
+
+        <div id="producers_result"></div>
+
+    </div>
+</div>
+
+<footer>
+    <div class="cryptro-footer-wrapper" >
+        <div class="cryptro-container clearfix" >
+            <div style="float:left;width:50%;">
+                <div class="widget_media_image">
+                    <a href="https://www.franceos.fr" target="_blank"><img src="img/franceos-logo-footer1-24.svg"style="max-width: 100%; height: auto;" /></a>
+                </div>
+            </div>
+            <div style="float:left;width:50%;">
+                <h3 class="cryptro-widget-title">Follow franceos</h3>
+
+                <div class="clearfix follow-links">
+                    <a href="https://github.com/franceos" target="_blank"><img src="img/franceos-github-icon-27.svg" alt=""></a>
+                    <a href="https://steemit.com/@franceos" target="_blank"><img src="img/franceos-steemit-icon-28.svg" alt=""></a>
+                    <a href="https://t.me/franceos" target="_blank"><img src="img/franceos-telegram-icon-29.svg" alt=""></a>
+                    <a href="https://twitter.com/franceos__" target="_blank"><img src="img/franceos-twitter-icon-30.svg" alt=""></a>
+                    <a href="https://www.franceos.fr/contact" target="_blank"><img src="img/franceos-mail-icon-26.svg" alt=""></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="cryptro-copyright-wrapper" >
+        <div class="cryptro-copyright-container cryptro-container clearfix">
+            <div class="cryptro-copyright-left cryptro-item-pdlr">Copyright © 2018, All Right Reserved</div>
+        </div>
+    </div>
+</footer>
+
+<script src="js/eos.js" integrity="sha384-WNs0Z8GNG6GOaOTMk3Fogkdbx4/EbfCAeC8ecV5mxJq93CCnHS6tERnbwm3W15OF"></script>
+
+<script>
+
+    let g_api_endpoint = "https://api.franceos.fr";
+    let g_chain_id = "aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906";
+
+    function handleError(error) {
+        console.error(error);
+        document.getElementById('info_message').innerText = error.message;
+        document.getElementById('info_message').className = "error";
+    }
+
+    function clearInfoMessage() {
+        document.getElementById('info_message').innerText = "";
+        document.getElementById('info_message').className = "";
+    }
+
+    function load() {
+        eos = Eos({httpEndpoint: g_api_endpoint, chainId: g_chain_id});
+        loadBpsInfos();
+    }
+
+    function loadBpsInfos() {
+        clearInfoMessage();
+        eos.getInfo({}).then(function(result) {
+
+            let head_block_producer = result.head_block_producer;
+            let head_block_num = result.head_block_num;
+            let last_irreversible_block_num = result.last_irreversible_block_num;
+            let head_block_time = result.head_block_time;
+
+            eos.getProducers({json:true,limit:1000}).then(function(result){
+                let total_producer_vote_weight = result.total_producer_vote_weight;
+                let votes_price = voteWeight();
+                head_block_time = convertUTCDateToLocalDate(new Date(head_block_time)).toLocaleString();
+
+                let result_html = '<div id="head_block_infos">'+
+                    '<div id="head_block_num"><span class="label">Block number:</span> <span>'+numberWithSpaces(head_block_num)+'</span></div>'+
+                    '<div id="head_block_time"><span class="label">Time:</span> <span>'+head_block_time+'</span></div>'+
+                    '<div id="head_block_producer"><span class="label">Produced by:</span> <span>'+head_block_producer+'</span></div>'+
+                    '<div id="last_irreversible_block_num"><span class="label">Last irreversible block:</span> <span>'+numberWithSpaces(last_irreversible_block_num)+'</span></div>'+
+                    '</div>';
+
+                result_html += '<table class="producers_table"><thead><tr><th>#</th><th>Name</th><th>Website</th><th>Votes</th></tr></thead><tbody>';
+                let i = 0;
+                while (i < result.rows.length) {
+                    let total_votes = ((result.rows[i].total_votes).split("."))[0];
+                    percent = (Math.round(((total_votes / total_producer_vote_weight)*100)*100) / 100)+'%'; // 2 decimals
+                    let votes_eos = numberWithSpaces(Math.round(Math.floor(total_votes / votes_price)/10000))+' EOS';
+
+                    let row_class = result.rows[i].is_active !== 1 ? ' inactive' : '';
+                    row_class += result.rows[i].owner === head_block_producer ? ' bp-producing' : '';
+                    row_class += i<21 ? ' bps21' : '';
+                    let link = result.rows[i].url.length > 0 ? '<a href="'+result.rows[i].url+'" target="_blank">'+result.rows[i].url+'</a>' : '';
+                    result_html += '<tr class="producers_row'+row_class+'"><td>'+(i+1)+'</td><td>'+result.rows[i].owner+'</td>'+
+                        '<td>'+link+'</td><td>'+votes_eos+' <span>('+percent+')</span></td></tr>';
+                    ++i;
+                    if (i === 21) {
+                        result_html += '<tr class="divider"><td colspan="4"></td></tr>';// separate top 21 from rest
+                    }
+                }
+                result_html += '</tbody></table>';
+                document.getElementById('producers_result').innerHTML = result_html;
+            }, handleError);
+        }, handleError);
+    }
+
+    function voteWeight() {
+        //https://github.com/EOSIO/eos/blob/master/contracts/eosio.system/voting.cpp#L105
+        let block_timestamp_epoch = 946684800000;
+        let weight = parseInt( ( (Date.now() / 1000) - (block_timestamp_epoch / 1000) ) / (86400 * 7) ) / 52;
+        return Math.pow(2, weight);
+    }
+
+    function numberWithSpaces(x) {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    }
+
+    function convertUTCDateToLocalDate(date) {
+        var newDate = new Date(date.getTime()+date.getTimezoneOffset()*60*1000);
+
+        var offset = date.getTimezoneOffset() / 60;
+        var hours = date.getHours();
+
+        newDate.setHours(hours - offset);
+
+        return newDate;
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        load();
+        setInterval(function(){
+            loadBpsInfos() // reload bps every 2 seconds
+        }, 2000);
+    });
+</script>
+</body>
+</html>
